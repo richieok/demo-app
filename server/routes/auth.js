@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const passport = require('../passport');
 
 router.post('/signup', (req, res, next)=>{
     console.log('Sign up');
@@ -6,9 +7,6 @@ router.post('/signup', (req, res, next)=>{
     res.json({ redirectTo: '/' });
 });
 
-router.post('/', (req, res, next)=>{
-    console.log('Sign in');
-    res.json({ redirectTo: '/dashboard'});
-});
+router.post('/', passport.authenticate('local') );
 
 module.exports = router;

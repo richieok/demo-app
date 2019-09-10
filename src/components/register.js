@@ -47,27 +47,25 @@ export default class SignupForm extends React.Component {
         return (
             <div>
                 <form onSubmit={this.handleSubmit}>
-                    <div>
+                    <div className="form-group">
                         <label htmlFor="firstname">First Name: </label>
-                        <input type="text" name="firstname" onChange={this.handleChange}/>
+                        <input type="text" name="firstname" className="form-control" onChange={this.handleChange}/>
                         <label htmlFor="lastname">Last Name: </label>
-                        <input type="text" name="lastname" onChange={this.handleChange}/>
+                        <input type="text" name="lastname" className="form-control" onChange={this.handleChange}/>
                     </div>
-                    <div>
+                    <div className="form-group">
                         <label htmlFor="username">Email: </label>
                         <input type="email" name="username" onChange={this.handleChange}/>
                     </div>
-                    <div>
+                    <div className="form-group">
                         <label htmlFor="password">Password: </label>
-                        <input type="password" name="password" onChange={this.handleChange}/>
+                        <input type="password" name="password" className="form-control" onChange={this.handleChange}/>
                     </div>
-                    <div>
+                    <div className="form-group">
                         <label htmlFor="confirm-password">Confirm Password: </label>
-                        <input type="password" name="confirm-password" onChange={this.handleChange}/>
+                        <input type="password" name="confirm-password" className="form-control" onChange={this.handleChange}/>
                     </div>
-                    <div>
-                        <button type="submit">Submit</button>
-                    </div>
+                    <button type="submit">Submit</button>
                 </form>
             </div>
         );

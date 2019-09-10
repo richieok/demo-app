@@ -1,5 +1,5 @@
 import React from 'react';
-import { Route, Switch, BrowserRouter as Router, Redirect } from 'react-router-dom';
+import { Route, Switch, BrowserRouter as Router } from 'react-router-dom';
 import Header from './components/navbar';
 import Home from './components/home';
 import Footer from './components/footer';
@@ -7,13 +7,13 @@ import Dashboard from './components/dashboard';
 import SignupForm from './components/register';
 import SigninForm from './components/signin';
 import NotFound from './components/notfound';
-import Axios from 'axios';
+// import Axios from 'axios';
 
 class App extends React.Component {
   constructor(props){
     super(props);
     this.state = {
-      isLoggedIn: true,
+      isLoggedIn: false,
       username: ''
     }
     this.componentDidMount = this.componentDidMount.bind(this);
@@ -33,7 +33,7 @@ class App extends React.Component {
     return (
       <div>
         <Router>
-          <Header />
+          <Header isLoggedIn={this.state.isLoggedIn}/>
           <Switch>
             <Route path='/' exact render={()=><Home/>}/>
             {this.state.isLoggedIn && dashboard}

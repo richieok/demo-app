@@ -41,13 +41,13 @@ export default class SigninForm extends React.Component {
         return (
             <div>
                 <form onSubmit={this.handleSubmit}>
-                    <div>
+                    <div className="form-group">
                         <label htmlFor="username">Username: </label>
-                        <input type="text" name="username" />
+                        <input type="text" name="username" className="form-control"/>
                     </div>
-                    <div>
+                    <div className="form-group">
                         <label htmlFor="password">Password: </label>
-                        <input type="password" name="password" />
+                        <input type="password" name="password" className="form-control"/>
                     </div>
                     <div>
                         <button type="submit">Submit</button>
