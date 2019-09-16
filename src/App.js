@@ -7,7 +7,7 @@ import Dashboard from './components/dashboard';
 import SignupForm from './components/register';
 import SigninForm from './components/signin';
 import NotFound from './components/notfound';
-// import Axios from 'axios';
+import Axios from 'axios';
 
 class App extends React.Component {
   constructor(props){
@@ -21,9 +21,16 @@ class App extends React.Component {
   }
   componentDidMount(){
     console.log('App did mount');
+    this.getUser();
   }
   getUser(){
     console.log('Get user');
+    Axios.get('http://localhost:5000')
+    .then(res=>{
+      const msg = res.data;
+      console.log(msg);
+    })
+    .catch(error => { console.log(error) });
   }
   render(){
     let dashboard;

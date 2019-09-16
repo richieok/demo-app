@@ -24,14 +24,14 @@ export default class SignupForm extends React.Component {
             username: this.state.username,
             password: this.state.password
         };
-        Axios.post('http://localhost:5000/auth/signup', {info})
+        Axios.post('http://localhost:5000/auth/signup', info)
         .then(res =>{
             console.log(res.data);
             const data = res.data;
             if (data && data.redirectTo){
                 this.setState({ redirectTo: data.redirectTo});
             }
-        })
+        });
     }
     handleChange(e){
         const name = e.target.name;
