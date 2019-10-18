@@ -19,6 +19,10 @@ const UserSchema = new Schema({
     lastname: {
         type: String,
         required: true,
+    },
+    date: {
+        type: Date,
+        default: Date.now
     }
 });
 

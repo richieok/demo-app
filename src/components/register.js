@@ -1,5 +1,4 @@
 import React from 'react';
-import Axios from 'axios';
 import {Redirect} from 'react-router-dom';
 
 export default class SignupForm extends React.Component {
@@ -18,20 +17,13 @@ export default class SignupForm extends React.Component {
     handleSubmit(e){
         e.preventDefault();
         //console.log(this.state);
-        const info = {
-            firstname: this.state.firstname,
-            lastname: this.state.lastname,
-            username: this.state.username,
-            password: this.state.password
-        };
-        Axios.post('http://localhost:5000/auth/signup', info)
-        .then(res =>{
-            console.log(res.data);
-            const data = res.data;
-            if (data && data.redirectTo){
-                this.setState({ redirectTo: data.redirectTo});
-            }
-        });
+        // const info = {
+        //     firstname: this.state.firstname,
+        //     lastname: this.state.lastname,
+        //     username: this.state.username,
+        //     password: this.state.password
+        // };
+        
     }
     handleChange(e){
         const name = e.target.name;

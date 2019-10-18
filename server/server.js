@@ -2,53 +2,52 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const requestIp = require('request-ip');
-const session = require('express-session');
-const cors = require('cors');
-const passport = require('passport');
-const MongoStore = require('connect-mongo')(session);
 const mongoose = require('mongoose');
 require('dotenv').config();
-require('./config/passport')(passport);
+const uri = process.env.ATLAS_URI;
+mongoose.connect(uri, { useNewUrlParser: true, useCreateIndex: true });
+const db = mongoose.connection;
+db.on('error', console.error.bind(console, 'MongoDB connection error: '));
 
 const port = process.env.PORT || 5000;
 const app = express();
 
 const indexRoute = require('./routes/index');
-const authRoute = require('./routes/auth')(passport);
+const authRoute = require('./routes/auth');
 
-app.use(morgan('dev'));
-app.use(cors());
-//app.use(express.json());
-app.use(bodyParser.urlencoded({
-    extended: false
-}));
-app.use(bodyParser.json());
 app.use(function (req, res, next) {
     const clientIp = requestIp.getClientIp(req);
     console.log(`Request from client ip: ${clientIp}`);
     next();
 });
-
-const uri = process.env.ATLAS_URI;
-
-mongoose.connect(uri, { useNewUrlParser: true, useCreateIndex: true });
-const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'MongoDB connection error: '));
-app.use(session({
-    store: new MongoStore({
-        mongooseConnection: db
-    }),
-    secret: 'GFGA@7#hjcx',
-    saveUninitialized: false,
-    resave: false,
-    cookie: {
-        maxAge: 3600,
-        httpOnly: true
-    }
+app.use(morgan('dev'));
+app.use(bodyParser.urlencoded({
+    extended: false
 }));
+app.use((req, res, next) => {
+    //console.log(req.headers);
+    if (req.headers.origin === "http://localhost:3000") {
+        //console.log(req.headers);
+        res.set('Access-Control-Allow-Origin', 'http://localhost:3000');
+        res.set('Access-Control-Allow-Headers', 'content-type, authorization');
+        res.set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
+    }
+    next();
+});
 
-app.use(passport.initialize());
-app.use(passport.session());
+// app.use(function (req, res, next) {
+//     res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+//     res.header("Access-Control-Allow-Credentials", true);
+//     res.header(
+//         "Access-Control-Allow-Headers",
+//         "Origin, X-Requested-With, Content-Type, Accept"
+//     );
+//     next();
+// });
+
+//app.use(express.json());
+app.use(bodyParser.json());
+
 
 app.use('/', indexRoute);
 app.use('/auth', authRoute);

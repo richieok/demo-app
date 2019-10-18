@@ -1,83 +1,57 @@
 const router = require('express').Router();
 const User = require('../models/user');
-const {body, validationResult} = require('express-validator');
-const {matchedData} = require('express-validator');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const { loginValidation, registerValidation } = require('../validation');
 const saltRounds = 10;
 
-module.exports = function(passport){
-    router.post('/signup', (req, res, next)=>{
-            console.log(req.body);
-            next();
-        },
-        [
-            body('username').escape(),
-            body('password').escape(),
-            body('lastname').escape(),
-            body('firstname').escape()
-        ], 
-        function(req, res, next){
-            const errors = validationResult(req);
-            if(!errors.isEmpty()){
-                res.json({message: 'Errors not empty'});
-            } else {
-                const match = matchedData(req);
-                User.find({ username: match.username})
-                .then(result=>{
-                    if(result.length){
-                        console.log('User already exists');
-                        res.redirect('/signup');
-                    } else {
-                        bcrypt.hash(match.password, saltRounds)
-                        .then(hash=>{
-                            User.create({
-                                username: match.username,
-                                password: hash,
-                                firstname: match.firstname,
-                                lastname: match.lastname
-                            });
-                            return res.redirect('/login');
-                        });
-                    }
-                })
-                .catch(error => { console.log(`Error msg: ${error.message}`) })
-            }
+router.post('/signup',
+    async (req, res, next) => {
+        const { error } = registerValidation(req.body);
+        if (error) return res.status(400).json({ error: error.details[0].message })
+        //check if user already exists
+        const emailExists = await User.findOne({ username: req.body.username });
+        if (emailExists) return res.status(400).json({ error: 'Email already exists' });
+        //hash password
+        const hash = await bcrypt.hash(req.body.password, saltRounds);
+
+        //Create a new user
+        const user = new User({
+            firstname: req.body.firstname,
+            lastname: req.body.lastname,
+            username: req.body.username,
+            password: hash
+        })
+        try {
+            const savedUser = await user.save();
+            res.json({ user: savedUser._id });
+        } catch (err) {
+            res.status(400).json({ error: err });
+        }
     });
 
-    router.post('/', (req, res, next)=>{
+router.post('/signin',
+    async (req, res, next) => {
         console.log(req.body);
-            next();
-        }, [
-        body('username').escape(),
-        body('password').escape()
-        ]
-        , 
-        (req, res, next)=>{
-            const errors = validationResult(req);
-            if(!errors.isEmpty()){
-                const holder = errors.mapped();
-                console.log(holder);
-                return res.redirect('/');
-            } else {
-                next();
-            }
-        },
-        passport.authenticate('local'),
-        (req, res)=>{
-            res.json({ message: 'Success' });
+        const { error } = loginValidation(req.body);
+        if (error) {
+            console.log('Found error')
+            return res.status(400).json({ error: error.details[0].message });
         }
-        );
-    return router;
-}
+        const user = await User.findOne({ username: req.body.username });
+        if (!user) return res.status(400).json({ error: 'Email or password is wrong' });
+        const validPassword = await bcrypt.compare(req.body.password, user.password);
+        if (!validPassword) return res.status(400).json({ error: 'Email or password is wrong' });
+        //Create and assign a token
+        const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET, { expiresIn: 600 });
+        console.log("Token created");
+        res.header('authorization', token).json({
+            token: token,
+            redirect: '/dashboard',
+            success: true,
+            username: user.username
+        });
+    }
+);
 
-// router.post('/signup', (req, res, next)=>{
-//     console.log(req.body);
-//     res.json({ redirectTo: '/' });
-// });
-
-// router.post('/', (req, res, next)=>{
-//     console.log(req.body);
-//     res.json({data: 'Hello'});
-// } );
-
-// module.exports = router;
+module.exports = router;

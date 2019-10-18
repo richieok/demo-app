@@ -1,25 +1,55 @@
 const router = require('express').Router();
+const jwt = require('jsonwebtoken');
+const User = require('../models/user');
+const verifyToken = require('./verifyToken');
 
-const isLoggedIn = function(req, res, next){
-    if(req.isAuthenticated()){
-        console.log('You are in');
-        // console.log(req.user);
-        next();
+const getUser = async function(req, res, next){
+    //Check for token in header
+    const token = req.header('authorization');
+    if (token) {
+        console.log('Found authorization header')
+        try{
+            const verified = jwt.verify(token, process.env.TOKEN_SECRET);
+            const user = await User.findOne({ _id: verified });
+            if(user){
+                req.user = user.username;
+            }
+        } catch (err){
+            console.log(err);
+        } finally {
+            next();
+        }
     } else {
-        console.log('Not logged in');
-        res.json({ message: 'Not logged in'});
+        console.log('Didn\'t find authorization header');
     }
+    next();
 }
 
-router.get('/', isLoggedIn, 
-    (req, res, next)=>{
+router.get('/', getUser, (req, res, next)=>{
     console.log('home route');
-    res.end();
+    console.log(req.headers);
+    let data = { user: req.user, message: "Home data"};
+    // console.log(req.session);
+    // if(req.user){
+    //     const user = {
+    //         username: req.user.username,
+    //         firstname: req.user.firstname,
+    //         lastname: req.user.lastname
+    //     }
+    //     data.user = user;
+    //     return res.json(data);
+    // }
+    return res.json(data);
+});
+
+router.get('/dashboard', verifyToken, (req, res)=>{
+    res.json({ package: 'Information object'});
 })
 
 router.get('/logout', (req, res, next)=>{
     console.log('Signing out');
-    res.end();
+    req.logout();
+    res.json({ isLoggedIn: false, redirectTo: '/'});
 })
 
 module.exports = router;

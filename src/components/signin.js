@@ -1,6 +1,5 @@
 import React from 'react';
 import {Redirect} from 'react-router-dom';
-import Axios from 'axios';
 
 export default class SigninForm extends React.Component {
     constructor(props){
@@ -8,7 +7,7 @@ export default class SigninForm extends React.Component {
         this.state = {
             username: '',
             password: '',
-            redirectTo: null
+            redirectTo: null,
         };
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleChange = this.handleChange.bind(this);
@@ -23,18 +22,11 @@ export default class SigninForm extends React.Component {
             username: this.state.username,
             password: this.state.password
         }
-        Axios.post('http://localhost:5000/auth', data)
-        .then(res =>{
-            const data = res.data;
-            console.log(data);
-            if (data && data.redirectTo){
-                this.setState({ redirectTo: data.redirectTo})
-            }
-        }).catch(error=>{console.log(error)})
+        this.props.auth(this.props.url, data);
     }
     render(){
         if (this.state.redirectTo){
-            return <Redirect to={this.state.redirectTo}/>;
+            return <Redirect to={{pathname :this.state.redirectTo}}/>;
         }
         if (this.props.isLoggedIn){
             return <Redirect to='/dashboard' />;
